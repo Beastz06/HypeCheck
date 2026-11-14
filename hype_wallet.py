@@ -161,8 +161,8 @@ FP = "https://api.flashpoint.ai/api/v1"
 def fp_frequencies(survey_id, label=None):
     """Raw frequencies from Flashpoint. Print once to see the shape, then pull the counts."""
     url = f"{FP}/surveys/{survey_id}/analytics/frequencies" + (f"/{label}" if label else "")
-    r = requests.get(url, headers={"Authorization": f"Bearer {os.environ['FLASHPOINT_TOKEN']}"},
-                     timeout=HTTP_TIMEOUT)
+    token = re.sub(r"[^\x21-\x7e]", "", os.environ["FLASHPOINT_TOKEN"])  # drop pasted invisible chars
+    r = requests.get(url, headers={"Authorization": f"Bearer {token}"}, timeout=HTTP_TIMEOUT)
     r.raise_for_status()
     body = r.json()
     _cache(f"fp_freq_{survey_id}_{label or 'all'}", body)

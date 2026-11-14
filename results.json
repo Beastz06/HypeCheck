@@ -1,0 +1,69 @@
+{
+  "generated": "2026-11-14",
+  "note": "Survey counts were entered from the Flashpoint results page (synthetic panel); Flashpoint was not called by this code.",
+  "sample_size": 100,
+  "verdict": {
+    "product": "On",
+    "control": "Nike",
+    "product_gap": -11,
+    "control_gap": -15,
+    "difference": 4,
+    "verdict": "IN LINE"
+  },
+  "products": {
+    "On": {
+      "ticker": "ONON",
+      "price_usd": 160,
+      "price_label": "Cloudrunner 3",
+      "attention_ratios": {
+        "wikipedia": 0.8821264894592117,
+        "youtube": 0.3180868014245182
+      },
+      "hype": 0,
+      "market": {
+        "score": 47,
+        "price_change": -0.032,
+        "volume_ratio": 1.99
+      },
+      "wallet": 11,
+      "survey_q3": {
+        "definitely": 7,
+        "probably": 18,
+        "total": 100
+      }
+    },
+    "Nike": {
+      "ticker": "NKE",
+      "price_usd": 155,
+      "price_label": "Vomero 18",
+      "attention_ratios": {
+        "wikipedia": 0.960333885209713,
+        "youtube": 0.329499202089254
+      },
+      "hype": 0,
+      "market": {
+        "score": 52,
+        "price_change": 0.023,
+        "volume_ratio": 1.18
+      },
+      "wallet": 15,
+      "survey_q5": {
+        "definitely": 8,
+        "probably": 30,
+        "total": 100
+      }
+    }
+  },
+  "gamestop_backtest": {
+    "window_end": "2021-01-31",
+    "wikipedia_ratio": 27.20138043036947,
+    "hype": 100,
+    "market": {
+      "score": 100,
+      "price_change": 15.874,
+      "volume_ratio": 14.39
+    },
+    "wallet": null
+  },
+  "limits": "Synthetic panel; stated intent overstates buying; Hype from Wikipedia and YouTube only."
+}

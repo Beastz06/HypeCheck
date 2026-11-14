@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hype vs. Wallet</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+  h1 { font-size: 1.1rem; color: #555; margin: 0 0 .5rem; font-weight: 600; }
+  #verdict { font-size: 1.6rem; font-weight: 700; padding: 1rem; border: 2px solid #1a1a1a; border-radius: 8px; }
+  #verdict small { display: block; font-size: .95rem; font-weight: 400; margin-top: .4rem; color: #444; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+  .col h2 { margin: 0 0 .5rem; font-size: 1.1rem; }
+  .tile { border: 1px solid #ccc; border-radius: 8px; padding: .8rem 1rem; margin-bottom: .6rem; }
+  .tile .label { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: #666; }
+  .tile .score { font-size: 2rem; font-weight: 700; }
+  .tile .sub { font-size: .85rem; color: #555; }
+  .gme { margin-top: 2rem; padding: 1rem; background: #f4f4f4; border-radius: 8px; }
+  .gme h2 { margin-top: 0; }
+  .gme ul { margin: 0; padding-left: 1.2rem; line-height: 1.7; }
+  .limits { margin-top: 2rem; font-size: .85rem; color: #555; border-top: 1px solid #ddd; padding-top: .8rem; }
+</style>
+</head>
+<body>
+<h1>Hype vs. Wallet</h1>
+<div id="verdict">Loading...</div>
+<div class="grid" id="grid"></div>
+<div class="gme" id="gme"></div>
+<div class="limits" id="limits"></div>
+
+<script id="embedded" type="application/json">{
+  "generated": "2026-11-14",
+  "note": "Survey counts were entered from the Flashpoint results page (synthetic panel); Flashpoint was not called by this code.",
+  "sample_size": 100,
+  "verdict": {
+    "product": "On",
+    "control": "Nike",
+    "product_gap": -11,
+    "control_gap": -15,
+    "difference": 4,
+    "verdict": "IN LINE"
+  },
+  "products": {
+    "On": {
+      "ticker": "ONON",
+      "price_usd": 160,
+      "price_label": "Cloudrunner 3",
+      "attention_ratios": {
+        "wikipedia": 0.8821264894592117,
+        "youtube": 0.3180868014245182
+      },
+      "hype": 0,
+      "market": {
+        "score": 47,
+        "price_change": -0.032,
+        "volume_ratio": 1.99
+      },
+      "wallet": 11,
+      "survey_q3": {
+        "definitely": 7,
+        "probably": 18,
+        "total": 100
+      }
+    },
+    "Nike": {
+      "ticker": "NKE",
+      "price_usd": 155,
+      "price_label": "Vomero 18",
+      "attention_ratios": {
+        "wikipedia": 0.960333885209713,
+        "youtube": 0.329499202089254
+      },
+      "hype": 0,
+      "market": {
+        "score": 52,
+        "price_change": 0.023,
+        "volume_ratio": 1.18
+      },
+      "wallet": 15,
+      "survey_q5": {
+        "definitely": 8,
+        "probably": 30,
+        "total": 100
+      }
+    }
+  },
+  "gamestop_backtest": {
+    "window_end": "2021-01-31",
+    "wikipedia_ratio": 27.20138043036947,
+    "hype": 100,
+    "market": {
+      "score": 100,
+      "price_change": 15.874,
+      "volume_ratio": 14.39
+    },
+    "wallet": null
+  },
+  "limits": "Synthetic panel; stated intent overstates buying; Hype from Wikipedia and YouTube only."
+}</script>
+<script>
+function ratioText(r) { return r.toFixed(2) + "x last year"; }
+
+function render(d) {
+  const v = d.verdict, on = d.products.On, nk = d.products.Nike;
+  const plain = { "OVERHYPED": "OVERHYPED relative to " + v.control,
+                  "UNDER-THE-RADAR": "UNDER-THE-RADAR relative to " + v.control,
+                  "IN LINE": "IN LINE with " + v.control }[v.verdict];
+  document.getElementById("verdict").innerHTML =
+    v.product + ": " + plain +
+    "<small>Hype-minus-Wallet gap: " + v.product + " " + v.product_gap + ", " + v.control + " " + v.control_gap +
+    " (difference " + (v.difference > 0 ? "+" : "") + v.difference + "; threshold is 15 either way)</small>";
+
+  function col(name, p) {
+    const r = p.attention_ratios;
+    return '<div class="col"><h2>' + name + ' (' + p.ticker + ', $' + p.price_usd + ' ' + p.price_label + ')</h2>' +
+      '<div class="tile"><div class="label">Hype (0-100)</div><div class="score">' + p.hype + '</div>' +
+      '<div class="sub">Wikipedia ' + ratioText(r.wikipedia) + '<br>YouTube ' + ratioText(r.youtube) + '</div></div>' +
+      '<div class="tile"><div class="label">Market (0-100)</div><div class="score">' + p.market.score + '</div>' +
+      '<div class="sub">30-day price ' + (p.market.price_change * 100).toFixed(1) + '%, volume ' + p.market.volume_ratio + 'x</div></div>' +
+      '<div class="tile"><div class="label">Wallet (0-80)</div><div class="score">' + p.wallet + '</div>' +
+      '<div class="sub">at $' + p.price_usd + ', n=' + d.sample_size + '</div></div></div>';
+  }
+  document.getElementById("grid").innerHTML = col("On", on) + col("Nike", nk);
+
+  const g = d.gamestop_backtest;
+  document.getElementById("gme").innerHTML =
+    '<h2>What real hype looks like</h2><ul>' +
+    '<li>GameStop, window ending ' + g.window_end + '</li>' +
+    '<li>Wikipedia attention: ' + Math.round(g.wikipedia_ratio) + 'x</li>' +
+    '<li>Stock up: ~' + Math.round(g.market.price_change) + 'x</li>' +
+    '<li>Hype ' + g.hype + ' &middot; Market ' + g.market.score + ' &middot; no Wallet (nobody can survey 2021 buyers today)</li></ul>';
+
+  document.getElementById("limits").textContent =
+    "Limits: synthetic panel; stated intent overstates buying; Hype from Wikipedia and YouTube only.";
+}
+
+// Prefer the live results.json; fall back to the embedded copy when opened from file://
+fetch("results.json").then(r => r.json())
+  .catch(() => JSON.parse(document.getElementById("embedded").textContent))
+  .then(render);
+</script>
+</body>
+</html>
