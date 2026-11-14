@@ -1,14 +1,34 @@
 """Hype vs. Wallet - data + scoring functions.
-pip install requests yfinance anthropic pandas
+pip install requests yfinance anthropic pandas python-dotenv
 Env: YOUTUBE_API_KEY (optional), ANTHROPIC_API_KEY, FLASHPOINT_TOKEN
-NOTE: written without network access - run each function once and check the output shape.
 """
-import os, json, math, statistics, datetime as dt
+import os, json, re, statistics, time, datetime as dt
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 UA = {"User-Agent": "hype-vs-wallet-hackathon/0.1 (student project)"}
 TODAY = dt.date.today()
 CAP = 3.0  # trend ratio that maps to a Hype score of 100
+HTTP_TIMEOUT = 20
+
+CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cache")
+os.makedirs(CACHE_DIR, exist_ok=True)
+
+
+def _slug(s):
+    return re.sub(r"[^A-Za-z0-9._-]+", "_", str(s)).strip("_")[:120] or "x"
+
+
+def _cache(name, payload):
+    path = os.path.join(CACHE_DIR, f"{_slug(name)}.json")
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2, default=str)
+    except Exception as e:
+        print(f"[cache] failed to write {path}: {e}")
+    return payload
 
 
 def _ratio(recent, baseline):
@@ -25,28 +45,43 @@ def wiki_ratio(article, end=TODAY, recent_days=30, base_days=365):
     start = end - dt.timedelta(days=recent_days + base_days)
     url = ("https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/"
            f"en.wikipedia/all-access/user/{article}/daily/{start:%Y%m%d}/{end:%Y%m%d}")
-    items = requests.get(url, headers=UA, timeout=30).json()["items"]
-    views = [i["views"] for i in items]
+    r = requests.get(url, headers=UA, timeout=HTTP_TIMEOUT)
+    try:
+        body = r.json()
+    except ValueError:
+        print(f"[wiki] non-JSON response for {article!r}: {r.text[:300]}")
+        _cache(f"wiki_{article}_raw", {"status": r.status_code, "text": r.text[:2000]})
+        return None, []
+    _cache(f"wiki_{article}", body)
+    if not isinstance(body, dict) or "items" not in body:
+        print(f"[wiki] unexpected shape for {article!r}: {json.dumps(body)[:400]}")
+        return None, []
+    items = body["items"]
+    views = [i.get("views", 0) for i in items]
+    if len(views) <= recent_days:
+        return None, views
     return _ratio(views[-recent_days:], views[:-recent_days]), views
 
 
-def gdelt_ratio(query, end=TODAY, recent_days=30, base_days=365):
-    """GDELT news volume (share of all coverage) over time."""
-    start = end - dt.timedelta(days=recent_days + base_days)
-    params = {"query": query, "mode": "timelinevol", "format": "json",
-              "startdatetime": f"{start:%Y%m%d}000000", "enddatetime": f"{end:%Y%m%d}235959"}
-    r = requests.get("https://api.gdeltproject.org/api/v2/doc/doc", params=params, headers=UA, timeout=60)
-    vals = [d["value"] for d in r.json()["timeline"][0]["data"]]
-    n = max(1, round(len(vals) * recent_days / (recent_days + base_days)))
-    return _ratio(vals[-n:], vals[:-n]), vals
-
-
 def gdelt_headlines(query, n=50):
-    """Recent headlines, used for the positive/negative split."""
+    """Recent English headlines (last month). No retries; returns [] on any failure."""
     params = {"query": f"{query} sourcelang:english", "mode": "artlist", "format": "json",
               "maxrecords": n, "timespan": "1m", "sort": "datedesc"}
-    r = requests.get("https://api.gdeltproject.org/api/v2/doc/doc", params=params, headers=UA, timeout=60)
-    return [a["title"] for a in r.json().get("articles", [])]
+    try:
+        r = requests.get("https://api.gdeltproject.org/api/v2/doc/doc",
+                         params=params, headers=UA, timeout=HTTP_TIMEOUT)
+    except requests.RequestException as e:
+        print(f"[gdelt_headlines] request failed for {query!r}: {e}")
+        return []
+    try:
+        body = r.json()
+    except ValueError:
+        print(f"[gdelt_headlines] non-JSON response for {query!r}: {r.text[:200]}")
+        _cache(f"gdelt_headlines_{query}_raw", {"status": r.status_code, "text": r.text[:2000]})
+        return []
+    _cache(f"gdelt_headlines_{query}", body)
+    articles = body.get("articles", []) if isinstance(body, dict) else []
+    return [a.get("title", "") for a in articles]
 
 
 def youtube_ratio(query, end=TODAY, windows=4):
@@ -61,12 +96,16 @@ def youtube_ratio(query, end=TODAY, windows=4):
         lo = hi - dt.timedelta(days=30)
         s = requests.get("https://www.googleapis.com/youtube/v3/search", params={
             "part": "id", "q": query, "type": "video", "order": "viewCount", "maxResults": 25,
-            "publishedAfter": lo.isoformat() + "Z", "publishedBefore": hi.isoformat() + "Z", "key": key}).json()
+            "publishedAfter": lo.isoformat() + "Z", "publishedBefore": hi.isoformat() + "Z", "key": key},
+            timeout=HTTP_TIMEOUT).json()
+        _cache(f"youtube_search_{query}_w{w}", s)
         ids = ",".join(i["id"]["videoId"] for i in s.get("items", []))
         if not ids:
             totals.append(0); continue
         v = requests.get("https://www.googleapis.com/youtube/v3/videos",
-                         params={"part": "statistics", "id": ids, "key": key}).json()
+                         params={"part": "statistics", "id": ids, "key": key},
+                         timeout=HTTP_TIMEOUT).json()
+        _cache(f"youtube_videos_{query}_w{w}", v)
         totals.append(sum(int(i["statistics"].get("viewCount", 0)) for i in v.get("items", [])))
     return _ratio(totals[:1], totals[1:]), totals
 
@@ -100,6 +139,14 @@ def market(ticker, end=TODAY, recent_days=30):
     import yfinance as yf
     df = yf.download(ticker, start=end - dt.timedelta(days=400), end=end + dt.timedelta(days=1),
                      progress=False, auto_adjust=True)
+    try:
+        flat = df.copy()
+        if hasattr(flat.columns, "to_flat_index"):
+            flat.columns = ["_".join(str(x) for x in c if x) if isinstance(c, tuple) else str(c)
+                            for c in flat.columns.to_flat_index()]
+        _cache(f"market_{ticker}_{end}", flat.reset_index().to_dict(orient="list"))
+    except Exception as e:
+        print(f"[cache] market serialize failed for {ticker}: {e}")
     close, vol = df["Close"].squeeze(), df["Volume"].squeeze()
     n = 21  # ~30 calendar days of trading
     price_change = float(close.iloc[-1] / close.iloc[-n] - 1)
@@ -114,9 +161,12 @@ FP = "https://api.flashpoint.ai/api/v1"
 def fp_frequencies(survey_id, label=None):
     """Raw frequencies from Flashpoint. Print once to see the shape, then pull the counts."""
     url = f"{FP}/surveys/{survey_id}/analytics/frequencies" + (f"/{label}" if label else "")
-    r = requests.get(url, headers={"Authorization": f"Bearer {os.environ['FLASHPOINT_TOKEN']}"}, timeout=60)
+    r = requests.get(url, headers={"Authorization": f"Bearer {os.environ['FLASHPOINT_TOKEN']}"},
+                     timeout=HTTP_TIMEOUT)
     r.raise_for_status()
-    return r.json()
+    body = r.json()
+    _cache(f"fp_freq_{survey_id}_{label or 'all'}", body)
+    return body
 
 def wallet_score(definitely, probably, total):
     """Discounted purchase intent at the real price. Max possible is 80."""
@@ -132,13 +182,55 @@ def verdict(product, control, threshold=15):
     return {"product_gap": gap_p, "control_gap": gap_c, "difference": diff, "verdict": label}
 
 
+def _timed(label, fn, *args, **kwargs):
+    t0 = time.time()
+    try:
+        out = fn(*args, **kwargs)
+    except Exception as e:
+        print(f"[{label}] FAILED after {time.time()-t0:.1f}s: {e}")
+        return None
+    print(f"[{label}] {time.time()-t0:.1f}s")
+    return out
+
+
 if __name__ == "__main__":
+    rows = []
     for name, article, query, ticker in [
-        ("On", "On_(company)", '"On Running"', "ONON"),      # check the Wikipedia article title
+        ("On", "On_(company)", '"On Running"', "ONON"),
         ("Nike", "Nike,_Inc.", '"Nike running"', "NKE"),
     ]:
-        w, _ = wiki_ratio(article); g, _ = gdelt_ratio(query); y, _ = youtube_ratio(query + " shoes")
-        print(name, {"wiki": w, "gdelt": g, "youtube": y, "hype": hype_score([w, g, y]), "market": market(ticker)})
-    # Backtest: GameStop, window ending 31 Jan 2021
+        print(f"\n--- {name} ---")
+        wres = _timed(f"{name} wiki", wiki_ratio, article)
+        w = wres[0] if wres else None
+        yres = _timed(f"{name} youtube", youtube_ratio, query + " shoes")
+        y = yres[0] if yres else None
+        m = _timed(f"{name} market", market, ticker)
+        hdl = _timed(f"{name} gdelt_headlines", gdelt_headlines, query)
+        h = hype_score([w, y])
+        rows.append((name, w, y, h, m, len(hdl) if hdl else 0))
+        print(name, {"wiki": w, "youtube": y, "hype": h, "market": m, "headlines": len(hdl) if hdl else 0})
+
+    # Backtest: GameStop, window ending 31 Jan 2021 (Hype = Wikipedia only)
+    print("\n--- GameStop backtest (ending 2021-01-31) ---")
     e = dt.date(2021, 1, 31)
-    print("GME", wiki_ratio("GameStop", end=e)[0], gdelt_ratio("GameStop", end=e)[0], market("GME", end=e))
+    gme_wres = _timed("GME wiki", wiki_ratio, "GameStop", end=e)
+    gme_wiki = gme_wres[0] if gme_wres else None
+    gme_market = _timed("GME market", market, "GME", end=e)
+    gme_hype = hype_score([gme_wiki])
+    print("GME", {"wiki": gme_wiki, "hype": gme_hype, "market": gme_market})
+
+    # Final summary table
+    def fmt(v, nd=2):
+        return "n/a" if v is None else f"{v:.{nd}f}" if isinstance(v, float) else str(v)
+
+    print("\n=== SUMMARY ===")
+    print(f"{'Product':<10} {'Wiki':>8} {'YouTube':>8} {'Hype':>6} {'Market':>8}")
+    for name, w, y, h, m, _n in rows:
+        mscore = m['score'] if m else None
+        print(f"{name:<10} {fmt(w):>8} {fmt(y):>8} {fmt(h):>6} {fmt(mscore):>8}")
+    gmescore = gme_market['score'] if gme_market else None
+    print(f"{'GameStop':<10} {fmt(gme_wiki):>8} {'n/a':>8} {fmt(gme_hype):>6} {fmt(gmescore):>8}")
+
+    if gme_market:
+        print(f"\nGameStop backtest detail: price_change={gme_market['price_change']}, "
+              f"volume_ratio={gme_market['volume_ratio']}, market_score={gme_market['score']}")
