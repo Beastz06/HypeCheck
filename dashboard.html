@@ -3,109 +3,143 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hype vs. Wallet</title>
+<title>Hype vs. Wallet: ONON vs. NKE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --bg: #f1f5f9; --card: #ffffff;
-    --on: #0ea5e9; --nike: #f97316; --navy: #0b1220;
-    --ok: #15803d; --ok-bg: #dcfce7; --warn: #b45309; --warn-bg: #fef3c7; --bad: #b91c1c; --bad-bg: #fee2e2;
+    --paper: #FAFAF7;
+    --band: #EFECE2;
+    --ink: #161616;
+    --ink2: #4A4A45;
+    --hair: #CBC8BD;
+    --accent: #7A1F2B;   /* oxblood: used for the rating only */
+    --on: #1F4E79;       /* blue */
+    --nike: #8A6410;     /* dark gold */
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans: "Public Sans", "Segoe UI", Arial, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink);
-         font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
-  header { background: linear-gradient(135deg, #0b1220 0%, #1e293b 100%); color: #fff; padding: 2.2rem 1rem 5.5rem; }
-  .wrap { max-width: 920px; margin: 0 auto; padding: 0 1rem; }
-  .eyebrow { font-size: .75rem; letter-spacing: .18em; text-transform: uppercase; color: #94a3b8; }
-  header h1 { margin: .35rem 0 0; font-size: 1.9rem; font-weight: 750; letter-spacing: -.02em; }
-  header p { margin: .4rem 0 0; color: #cbd5e1; font-size: .95rem; }
+  html { font-size: clamp(18px, 0.9vw + 3px, 22px); }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--sans); font-size: 1rem; line-height: 1.5;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+  h2 { font-family: var(--serif); font-weight: 600; font-size: 1.7rem; line-height: 1.2; margin: 0; letter-spacing: -.005em; }
+  .tk { font-family: var(--mono); font-weight: 500; letter-spacing: 0; }
 
-  main { margin-top: -3.6rem; padding-bottom: 3rem; }
-  .card { background: var(--card); border-radius: 14px; box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.08); }
+  /* coverage header */
+  .cover { border-bottom: 1px solid var(--ink); padding: 1rem 0 .8rem; font-size: 1rem; color: var(--ink2); }
+  .cover .tk { color: var(--ink); }
+  .cover .title { font-family: var(--serif); font-weight: 600; color: var(--ink); font-size: 1.15rem; }
 
-  #verdict { padding: 1.6rem 1.8rem; display: flex; gap: 1.4rem; align-items: center; flex-wrap: wrap; }
-  .badge { font-size: .8rem; font-weight: 800; letter-spacing: .12em; padding: .55rem .95rem; border-radius: 999px; white-space: nowrap; }
-  .badge.inline { color: var(--ok); background: var(--ok-bg); }
-  .badge.over { color: var(--bad); background: var(--bad-bg); }
-  .badge.under { color: var(--warn); background: var(--warn-bg); }
-  #verdict .text { flex: 1; min-width: 240px; }
-  #verdict .headline { font-size: 1.55rem; font-weight: 750; letter-spacing: -.015em; }
-  #verdict .detail { margin-top: .35rem; color: var(--muted); font-size: .92rem; line-height: 1.5; }
+  /* rating block */
+  .rating { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 3.5rem; align-items: center;
+            padding: 2.2rem 0 2.4rem; border-bottom: 1px solid var(--ink); }
+  .rating .kicker { color: var(--ink2); font-size: 1.05rem; }
+  .rating .word { font-family: var(--serif); font-weight: 600; color: var(--accent); line-height: 1;
+                  font-size: clamp(3.6rem, 7vw, 6.2rem); margin: .7rem 0 .8rem; letter-spacing: -.01em; }
+  .rating .word.long { font-size: clamp(2.6rem, 4.6vw, 4.2rem); }
+  .rating .pts { font-size: 1.35rem; font-weight: 500; }
+  .rating .detail { margin-top: .6rem; color: var(--ink2); }
 
-  .section-title { margin: 2.2rem 0 .8rem; font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .gauge { position: relative; padding-top: 1.6rem; }
+  .g-marker { position: absolute; top: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
+  .g-val { font-weight: 600; font-size: 1.3rem; line-height: 1.4rem; color: var(--accent); }
+  .g-marker i { display: block; width: 3px; height: 2.9rem; background: var(--accent); }
+  .g-track { display: flex; height: 1.1rem; border: 1px solid var(--ink); }
+  .g-track span { display: block; height: 100%; }
+  .g-track .under { width: 25%; background: repeating-linear-gradient(135deg, #8d8a80 0 1px, transparent 1px 6px); }
+  .g-track .inline { width: 50%; background: #E6E3D8; border-left: 1px solid var(--ink); border-right: 1px solid var(--ink); }
+  .g-track .over { width: 25%; background: repeating-linear-gradient(45deg, #8d8a80 0 1px, transparent 1px 6px); }
+  .g-ticks { position: relative; height: 1.5rem; margin-top: .25rem; font-size: .95rem; color: var(--ink2); }
+  .g-ticks span { position: absolute; transform: translateX(-50%); }
+  .g-names { position: relative; height: 1.6rem; font-size: 1rem; font-weight: 500; margin-top: .1rem; white-space: nowrap; }
+  .g-names span { position: absolute; top: 0; }
+  .g-names span:nth-child(1) { left: 0; }
+  .g-names span:nth-child(2) { left: 50%; transform: translateX(-50%); }
+  .g-names span:nth-child(3) { right: 0; }
 
-  .compare { display: grid; grid-template-columns: 120px 1fr 1fr; gap: .8rem; align-items: stretch; }
-  .col-head { padding: .9rem 1.1rem; border-radius: 12px; color: #fff; }
-  .col-head.on { background: var(--on); } .col-head.nike { background: var(--nike); }
-  .col-head { display: flex; align-items: center; gap: .8rem; }
-  .logo { background: #fff; border-radius: 10px; width: 64px; height: 48px; flex: none; display: flex;
-          align-items: center; justify-content: center; padding: 6px; }
-  .logo img { max-width: 100%; max-height: 100%; display: block; }
-  .gme-head { display: flex; align-items: center; gap: .9rem; }
-  .gme-head .logo { width: 110px; }
-  .col-head .name { font-size: 1.15rem; font-weight: 750; }
-  .col-head .meta { font-size: .8rem; opacity: .92; margin-top: .15rem; }
-  .row-label { display: flex; flex-direction: column; justify-content: center; }
-  .row-label .t { font-weight: 700; font-size: .95rem; }
-  .row-label .s { color: var(--muted); font-size: .78rem; margin-top: .15rem; }
-  .tile { padding: 1.1rem 1.2rem; border-top: 4px solid var(--accent); }
-  .tile.on { --accent: var(--on); } .tile.nike { --accent: var(--nike); }
-  .tile .score { font-size: 2.6rem; font-weight: 800; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; }
-  .tile .score span { font-size: .95rem; font-weight: 600; color: var(--muted); margin-left: .25rem; letter-spacing: 0; }
-  .tile .sub { margin-top: .6rem; color: var(--muted); font-size: .85rem; line-height: 1.55; }
-  .tile .sub b { color: var(--ink); font-weight: 650; }
+  /* scorecard */
+  .score { padding: 2rem 0 2.2rem; }
+  .score h2 { margin-bottom: 1rem; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; vertical-align: top; padding: 1.05rem 1.2rem 1.15rem 0; }
+  th:nth-child(n+2), td:nth-child(n+2) { padding-left: 1.6rem; }
+  th:nth-child(n+3), td:nth-child(n+3) { border-left: 1px solid var(--hair); }
+  thead th { border-bottom: 1px solid var(--ink); padding-bottom: .8rem; font-weight: 400; }
+  thead th.col { border-top: 4px solid var(--c); }
+  thead th.on { --c: var(--on); } thead th.nike { --c: var(--nike); }
+  tbody tr { border-bottom: 1px solid var(--hair); }
+  tbody tr.has-note { border-bottom: none; }
+  tbody tr.note td { padding: 0 0 1rem 1.6rem; border-bottom: 1px solid var(--hair); border-left: none; font-family: var(--serif);
+                     font-style: italic; color: var(--ink2); font-size: 1.1rem; }
+  tbody tr:last-child { border-bottom: 1px solid var(--ink); }
+  col.c-label { width: 15%; }
+  .ch { display: flex; align-items: center; gap: .9rem; }
+  .lgbox { width: 3.2rem; height: 2.4rem; display: flex; align-items: center; justify-content: center; flex: none; }
+  .lgbox img { max-width: 100%; max-height: 100%; display: block; }
+  .cname { font-family: var(--serif); font-weight: 600; font-size: 1.5rem; line-height: 1.1; color: var(--c); }
+  .sw { display: inline-block; width: .7rem; height: .7rem; margin-right: .5rem; background: var(--c); vertical-align: .1em; }
+  th.nike .sw { transform: rotate(45deg); }
+  .cmeta { color: var(--ink2); font-size: 1rem; margin-top: .2rem; }
+  .cmeta .tk { color: var(--ink); }
+  tbody th { font-weight: 600; font-size: 1.15rem; }
+  tbody th small { display: block; font-weight: 400; color: var(--ink2); font-size: 1rem; }
+  .numrow { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
+  .num { font-size: 3.5rem; font-weight: 500; line-height: 1; letter-spacing: -.02em; }
+  .of { color: var(--ink2); font-size: 1.1rem; }
+  .side { margin-left: .6rem; font-size: 1.05rem; line-height: 1.35; }
+  .side b { font-weight: 600; }
+  .det { margin-top: .55rem; color: var(--ink2); font-size: 1.05rem; line-height: 1.45; }
+  .det b { color: var(--ink); font-weight: 600; }
 
-  .gme { background: linear-gradient(135deg, #0b1220 0%, #1e293b 100%); color: #fff; padding: 1.6rem 1.8rem; }
-  .gme h2 { margin: 0; font-size: 1.35rem; letter-spacing: -.01em; }
-  .gme .sub { color: #94a3b8; font-size: .88rem; margin-top: .3rem; }
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.3rem; }
-  .stat { background: rgba(255,255,255,.07); border-radius: 10px; padding: .9rem 1rem; }
-  .stat .v { font-size: 1.9rem; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-  .stat .l { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: #94a3b8; margin-top: .2rem; }
+  /* backtest strip */
+  .strip { background: var(--band); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 2rem 0 2.2rem; }
+  .strip-head { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
+  .strip-head .lgbox { width: 7rem; height: 1.8rem; }
+  .strip .lede { margin: .5rem 0 1.4rem; color: var(--ink2); }
+  .figs { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--ink); }
+  .fig { padding: 1rem 1.2rem 0 1.2rem; border-left: 1px solid var(--hair); }
+  .fig:first-child { border-left: none; padding-left: 0; }
+  .fig .big { font-size: 3.5rem; font-weight: 500; line-height: 1; letter-spacing: -.02em; }
+  .fig .cap { margin-top: .5rem; font-weight: 500; }
+  .fig .sub { color: var(--ink2); font-size: 1rem; }
+  .strip .reading { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid var(--hair); font-size: 1.05rem; line-height: 1.55; }
+  .strip .reading p { margin: 0 0 .5rem; }
+  .strip .reading strong { font-weight: 600; }
 
-  .bt { width: 100%; border-collapse: collapse; margin-top: 1.3rem; font-size: .88rem; }
-  .bt th { text-align: left; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: #94a3b8;
-           padding: .5rem .6rem; border-bottom: 1px solid rgba(255,255,255,.18); }
-  .bt td { padding: .6rem; border-bottom: 1px solid rgba(255,255,255,.08); font-variant-numeric: tabular-nums; }
-  .bt td:first-child { color: #cbd5e1; }
-  .bt td:nth-child(2) { font-weight: 700; }
+  .foot { padding: 1.3rem 0 2.5rem; font-size: .9rem; color: var(--ink2); line-height: 1.5; }
+  .foot p { margin: 0; }
 
-  .hind { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-top: 1.3rem; padding: 1rem 1.1rem;
-          background: rgba(255,255,255,.07); border-radius: 10px; }
-  .hind .hind-text { flex: 1; min-width: 240px; font-size: .88rem; line-height: 1.55; color: #e2e8f0; }
-
-  .limits { margin-top: 1.6rem; padding: .9rem 1.2rem; border-left: 4px solid var(--warn); background: var(--warn-bg);
-            color: #78350f; font-size: .88rem; border-radius: 0 10px 10px 0; line-height: 1.5; }
-  footer { text-align: center; color: var(--muted); font-size: .78rem; margin-top: 1.4rem; }
-
-  @media (max-width: 720px) {
-    .compare { grid-template-columns: 1fr 1fr; }
-    .compare .spacer { display: none; }
-    .row-label { grid-column: 1 / -1; margin-top: .6rem; }
-    .stats { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 960px) {
+    .wrap { padding: 0 1.2rem; }
+    .rating { grid-template-columns: 1fr; gap: 1.8rem; }
+    .figs { grid-template-columns: 1fr 1fr; }
+    .fig:nth-child(3) { border-left: none; padding-left: 0; }
+    .fig:nth-child(n+3) { margin-top: 1.2rem; }
+    .num, .fig .big { font-size: 2.8rem; }
+    th, td { padding-right: .7rem; }
+    th:nth-child(n+2), td:nth-child(n+2) { padding-left: .9rem; }
   }
 </style>
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <div class="eyebrow">Attention vs. buyers</div>
-    <h1>Hype vs. Wallet</h1>
-    <p>Is the attention on this product backed by buyers willing to pay for it?</p>
-  </div>
-</header>
 
-<main class="wrap">
-  <section id="verdict" class="card">Loading...</section>
+<div class="wrap"><div class="cover" id="cover">Loading...</div></div>
 
-  <div class="section-title">Scorecard</div>
-  <section id="grid" class="compare"></section>
+<div class="wrap">
+  <section class="rating" id="rating"></section>
+  <section class="score" id="score"></section>
+</div>
 
-  <div class="section-title">Backtest</div>
-  <section id="gme" class="card gme"></section>
+<section class="strip"><div class="wrap" id="gme"></div></section>
 
-  <div class="limits" id="limits"></div>
-  <footer id="footer"></footer>
-</main>
+<div class="wrap"><footer class="foot"><p id="limits"></p></footer></div>
 
 <script id="logos">const LOGOS = {"on": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjwhRE9DVFlQRSBzdmcgIFBVQkxJQyAnLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4nICAnaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkJz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbDpzcGFjZT0icHJlc2VydmUiIGhlaWdodD0iNzkycHgiIHdpZHRoPSI2MTJweCIgdmVyc2lvbj0iMS4xIiB5PSIwcHgiIHg9IjBweCIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9Ii0xMDQuNDI4IC0wLjYxOCA2MTIgNzkyIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IC0xMDQuNDI4IC0wLjYxOCA2MTIgNzkyIj4KPHBhdGggZD0ibTQwMi45NyA2Mi43NTRjLTEuMjM2IDEuMjM2LTIuNDczIDIuNzgyLTMuNzEgNC4wMTktMTcuMDAyIDE3LjAwMi0zNC4zMTMgMzQuMzE0LTUxLjMxNSA1MS4zMTYtMC42MTggMC42MTktMC45MjggMC45MjgtMS4yMzcgMS4yMzctMS4yMzYgMS41NDUtMS4yMzYgMy4wOTEgMC4zMSA1LjI1NSAxMi45ODMgMjEuOTQ4IDIxLjAyMSA0NS40NDIgMjMuODA0IDcwLjQ4MiA1LjU2NCA1MS4zMTYtNy40MiA5Ny4zNzctMzkuNTY5IDEzNy44Ny0yNy41MTMgMzQuNjIzLTYzLjM3MiA1Ni4yNjItMTA2LjM0IDY1Ljg0NS0xOS43ODUgNC4zMjgtMzkuODc4IDQuNjM3LTU5Ljk3MiAyLjQ3My0zMy4wNzctMy40LTYyLjc1NC0xNS40NTYtODkuMzQtMzUuMjQxLTM4LjMzMy0yOC40NC02Mi4xMzYtNjYuMTU1LTcyLjAyOC0xMTMuMTQtMy43MDktMTcuMzEyLTQuMzI4LTM0LjkzMi0yLjc4Mi01Mi4yNDMgMy43MDktNDAuNDk3IDE5LjE2Ny03Ni4zNTYgNDYuNjc5LTEwNi45NiAyNi4yNzYtMjkuMzY4IDU4LjQyNi00OC41MzQgOTYuNDUtNTcuMTg5IDE4Ljg1Ny00LjMyOCAzNy43MTQtNS44NzQgNTcuMTg5LTQuMDE5IDI3LjgyMiAyLjQ3MyA1My43ODkgMTAuNTExIDc3LjkwMSAyNC40MjIgMy4wOTIgMS44NTQgNC4zMjggMC42MTggNi4xODQtMS4yMzcgMTcuMDItMTcuMDA1IDM0LjAyLTM0LjAwNyA1MS4wMi01MS4wMSAxLjIzNi0xLjIzNyAyLjQ3My0yLjc4MiA0LjAxOS00LjYzNyAyMS4wMiAyMS4wMjEgNDEuNzMgNDEuNzMzIDYyLjc1IDYyLjc1NG0tMTE1LjkyIDE1Ny42NmMxLjU0Ni01OS42NjMtNDUuNDQyLTEwMi45NC05OC4zMDUtMTA0LjQ5LTU5LjY2My0xLjU0Ni0xMDQuMTggNDcuOTE2LTEwNC4xOCAxMDEuNCAwIDU0LjcxNyA0Ni4wNjEgMTAyLjAxIDEwMS40IDEwMS4wOSA1NC40MSAwLjYyIDk5Ljg1LTQ0LjIxIDEwMS4wOS05OCIgZmlsbD0iIzAwMDAwMCIvPgo8cGF0aCBkPSJtMzY1LjI2IDYzMy40MmMwLjMwOSA1MC4wNzkgMCAxMDAuNDcgMCAxNTAuNTV2Ni44MDFoLTg5LjY0OXYtNi4xODNjMC01Mi41NTMgMC4zMS0xMDUuMSAwLTE1Ny42NiAwLTI3LjUxMy05LjU4My01MS42MjUtMjkuNjc3LTcwLjc5Mi0xMy4yOTItMTIuNjc0LTI5LjM2Ny0yMC4wOTQtNDcuOTE2LTIyLjU2Ni0yNC4xMTItMy40LTQ2LjA2MSAyLjQ3My02NS41MzYgMTcuMDAyLTE5LjQ3NiAxNC44MzktMzAuOTE0IDM0LjkzMy0zNC42MjMgNTguNzM1LTEuODU1IDExLjQzOC0yLjE2NCAyMy4xODYtMi4xNjQgMzQuOTMzLTAuMzA5IDQ2LjY3OSAwIDkzLjA0OSAwIDEzOS43M3Y2LjQ5MWgtODkuMDE5di01Ljg3M2MwLTU2LjU3MS0wLjYxOC0xMTMuNDUgMC4zMDktMTcwLjAyIDAuNjE4LTI5Ljk4NiAxMC4yMDItNTguNDI3IDI1Ljk2Ny04NC4zOTQgMjYuMjc2LTQzLjI3OCA2My42ODItNzEuMTAxIDExMi44My04Mi41MzkgMTUuMTQ4LTMuNCAzMS41MzItNC45NDUgNDcuMjk4LTQuMzI3IDQ5LjE1MiAyLjE2NCA5MS4xOTQgMjEuNjM5IDEyNC41OCA1OC40MjYgMjMuODAzIDI2LjU4NiAzOC45NSA1Ny40OTkgNDQuMjA2IDkzLjA1IDIuMTYgMTIuOTggMy40IDI1Ljk2IDMuNCAzOC42NCIgZmlsbD0iIzAwMDAwMCIvPgo8L3N2Zz4K", "nike": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAwIiBoZWlnaHQ9IjM1Ni4zOSIgdmlld0JveD0iMTM1LjUgMzYxLjM4IDEwMDAgMzU2LjM5Ij4KICA8cGF0aCBkPSJNMjQ1LjgwNzUgNzE3LjYyNDA2Yy0yOS43OTU4OC0xLjE4MzctNTQuMTczNC05LjMzNjgtNzMuMjM0NTktMjQuNDc5Ni0zLjYzNzc1LTIuODkyOC0xMi4zMDYxMS0xMS41NjYzLTE1LjIxNDI3LTE1LjIyNDUtNy43Mjk1OC05LjcxOTMtMTIuOTg0NjctMTkuMTc4NS0xNi40ODk3Ny0yOS42NzM0LTEwLjc4NTctMzIuMzA2MS01LjIzNDY5LTc0LjY5ODkgMTUuODc3NTMtMTIxLjIyNDMgMTguMDc2NS0zOS44MzE2IDQ1Ljk2OTMyLTc5LjMzNjYgOTQuNjMyNTItMTM0LjA1MDggNy4xNjgzNi04LjA1MTEgMjguNTE1MjYtMzEuNTk2OSAyOC42NTMwMi0zMS41OTY5LjA1MSAwLTEuMTEyMjUgMi4wMTUzLTIuNTc2NTIgNC40Njk0LTEyLjY1MzA0IDIxLjE5MzgtMjMuNDc5NTcgNDYuMTU4LTI5LjM3NzUxIDY3Ljc3MDMtOS40NzQ0OCAzNC42Nzg1LTguMzMxNjMgNjQuNDM4NyAzLjM0NjkzIDg3LjUxNTEgOC4wNTYxMSAxNS44OTggMjEuODY3MzEgMjkuNjY4NCAzNy4zOTc5IDM3LjI4MDYgMjcuMTg4NzQgMTMuMzIxNCA2Ni45OTQ4IDE0LjQyMzUgMTE1LjYwNjk5IDMuMjI0NSAzLjM0Njk0LS43NzU1IDE2OS4xOTM2My00NC44MDEgMzY4LjU1MDQ4LTk3LjgzNjYgMTk5LjM1Njg2LTUzLjA0MDggMzYyLjQ5NDM5LTk2LjQwMjkgMzYyLjUxOTg5LTk2LjM2NzIuMDU2LjA0Ni00NjMuMTYyNTkgMTk4LjI1OTktNzAzLjYyNjU0IDMwMS4wOTE0LTM4LjA4MTU4IDE2LjI4MDYtNDguMjY1MjEgMjAuMzkyOC02Ni4xNjgyNyAyNi42Nzg1LTQ1Ljc2NTI1IDE2LjA3MTQtODYuNzYwMDggMjMuNzM5OC0xMTkuODk3NzkgMjIuNDIzNXoiLz4KPC9zdmc+", "gme": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iMTAwMC4wMTciIGhlaWdodD0iMjA3LjgxMiIgdmlld0JveD0iMCAwIDEwMDAuMDE3IDIwNy44MTIiPgogIDxkZWZzPgogICAgPHN0eWxlPi5he2ZpbGw6IzIxMjMyMjt9LmJ7ZmlsbDojZWUyYTI4O308L3N0eWxlPgogIDwvZGVmcz4KICA8cGF0aCBjbGFzcz0iYSIgZD0iTSA0MzAuNzQzMywxNzMuODUwNCBIIDM4My41MDk5MiBWIDg0LjY0MzY1NSBjIDAsLTEyLjA1MjEzOSAtMS4zNTg0NywtMjAuNzI1NTAxIC03Ljg3MjIxLC0yMC43MjU1MDEgLTYuNTEzNzcsMCAtNy44NzIyMyw4LjY3MzM2MiAtNy44NzIyMywyMC43MjU1MDEgViAxNzMuODUwNCBIIDMyMC41NjY5MiBWIDg0LjY0MzY1NSBjIDAsLTEyLjA1MjEzOSAtMS4zNTg0NywtMjAuNzI1NTAxIC03Ljg3MjIzLC0yMC43MjU1MDEgLTYuNTEzNzQsMCAtNy44NzIyMyw4LjY3MzM2MiAtNy44NzIyMywyMC43MjU1MDEgViAxNzMuODUwNCBIIDI1Ny41ODkxIFYgMzcuNjE5NDAyIGggNDcuMjY4MiB2IDE0LjE0MjExMSBhIDMzLjc1MzA1NSwzMy43NTI5NjQgMCAwIDEgMzAuMDYwNzYsLTE2Ljc1NDU3MSBjIDEyLjg4ODE3LDAgMjQuMDY5NTMsNC42Njc1OTYgMzEuMTA1NzcsMTguMDQzMzggYSAzMi44MTI1NjYsMzIuODEyNDggMCAwIDEgMzAuNjUyOTMsLTE4LjA0MzM4IGMgMTguMzIyMDksMCAzNC4xMDEzOCwxMS43MDM4MTggMzQuMTAxMzgsNDEuMjA3MTgyIHogTSAxOTQuMDg4NzcsMTA1LjgyMTk4IGMgLTYuMzA0NzYsNS4yMjQ5MyAtMTUuNzc5MzEsMTAuNjkzNjcgLTE1Ljc3OTMxLDI3LjI3NDA3IDAsMTEuMTQ2NDkgMi44NTYzMiwxNS43MDk1OCA3LjkwNzA4LDE1LjcwOTU4IDUuMDUwNzcsMCA3Ljg3MjIzLC00LjU2MzA5IDcuODcyMjMsLTE1LjcwOTU4IHogbSAtNi42ODc5MiwtNzAuODE1MDM4IGMgMzEuMzQ5NTgsMCA1My45MjEyOCwxMC44Njc4MyA1My45MjEyOCw0NS4wNzM2MjQgViAxNzMuODUwNCBoIC00Ny4yMzMzNiB2IC0xMS44MDgzMSBjIC01LjA1MDc3LDguMDQ2MzcgLTE0LjE3Njk4LDE0LjI4MTQ0IC0yOC45MTEyOSwxNC4yODE0NCAtMTAuMTM2MzcsMCAtMzMuODIyNzIsLTMuNDgzMjggLTMzLjgyMjcyLC0zOC44NzMzOCAwLC00OC40NTIzOTQgNjIuNjk5MTcsLTMxLjgzNzE2IDYyLjY5OTE3LC02MS4zMDU2OTMgMCwtMTIuMDUyMTM5IC0yLjg1NjI5LC0xNi45NjM1NjIgLTcuOTA3MDYsLTE2Ljk2MzU2MiAtNS4wNTA3NiwwIC03Ljg3MjIyLDQuOTExNDIzIC03Ljg3MjIyLDE2Ljk2MzU2MiB2IDcuNDg5MDQ3IGggLTQ0LjgyOTkxIHYgLTMuNDgzMjc3IGMgMCwtMzQuMjA1Nzg5IDIyLjYwNjUzLC00NS4wNzM2MTggNTMuOTU2MTEsLTQ1LjA3MzYxOCBNIDUxMC4zMDE2LDExOS4xNjI5MyBoIDQ0Ljg2NDcyIGMgLTAuNjI3LDM5LjYzOTcyIC0yMy41MTIxOCw1Ny4yOTk5NCAtNTUuMTA1NTksNTcuMjk5OTQgLTMxLjU5MzQyLDAgLTU1LjEwNTYxLC0xOC4wMDg1NCAtNTUuMTA1NjEsLTU4Ljg2NzQgViA5My44NzQzNDQgYyAwLC00MC44NTg4NTEgMjMuMDk0MTksLTU4Ljg2NzQwMiA1NS4xMDU2MSwtNTguODY3NDAyIDMyLjAxMTQsMCA1NS4xMDU1OSwxOC4wMDg1NTEgNTUuMTA1NTksNTguODY3NDAyIHYgMTQuMjgxNDQ2IGggLTYyLjk0MyB2IDIzLjMwMzEyIGMgMCwxMi4wMTczMSAxLjUzMjY1LDIwLjY5MDY4IDkuMDIxNzMsMjAuNjkwNjggNy40ODkwNiwwIDkuMDU2NTUsLTguNjczMzcgOS4wNTY1NSwtMjAuNjkwNjggeiBtIC0yLjIyOTMyLC0zOS4yOTEzNjQgYyAwLC0xMi4wMTczMDYgLTEuMzU4NDgsLTIwLjY5MDY3MSAtNy44NzIyMywtMjAuNjkwNjcxIC02LjUxMzc2LDAgLTcuODcyMjMsOC42NzMzNjUgLTcuODcyMjMsMjAuNjkwNjcxIHYgNy4yMTAzODYgaCAxNS43NDQ0NiB6IE0gMTE3Ljk0NDEsNjYuODQ0MTA4IHYgLTYuOTY2NTYgQyAxMTcuOTQ0MSwxMi43NDg3OTggODkuNzk5MTQ3LDAgNTguNzI4MjI0LDAgMjcuNjU3MzAxLDAgMCwxNi43NTQ1NjggMCw2My45MTgxNTQgdiA0OC40NTIzODYgYyAwLDMxLjczMjY4IDEzLjQ0NTQ4OCw2NC4wOTIzMyA0OS40Mjc4NDgsNjQuMDkyMzMgMTYuNTEwNzgxLDAgMjcuMDk5OTczLC03Ljk3NjcxIDMxLjY2MzA3OSwtMTUuNTM1NDIgbCAzLjcyNzExNywxMy4wNjIyOSBIIDExNy43MDAyNyBWIDgzLjYzMzUwNCBIIDYwLjU3NDM2NSBWIDExMi43NTM3IGggMTIuODUzMzMxIHYgNi4wOTU3NiBjIDAsMTQuODAzOTEgLTIuMDU1MTQsMjguMzUzODcgLTExLjM5MDM1LDI4LjM1Mzg3IC05LjMzNTIxLDAgLTExLjM1NTUxNywtMTMuNTQ5OTYgLTExLjM1NTUxNywtMjguMzUzODcgViA1Ni43Nzc0MzMgYyAwLC0xNC40MjA3NzIgMC45NDA0ODgsLTI3LjY1NzIyOSA4LjE4NTcyNiwtMjcuNjU3MjI5IDcuMjQ1MjM4LDAgOC4xODU3MjYsMTMuMjM2NDU3IDguMTg1NzI2LDI3LjY1NzIyOSB2IDEwLjA2NjY3NSB6Ii8+CiAgPHBhdGggY2xhc3M9ImIiIGQ9Im0gNzU4Ljg2ODk3LDE3MC45OTQxMyBjIC04LjU3NTA0LDMuNjIyMjcgLTE3Ljc5MTI3LDUuNDgyMSAtMjcuMDk5OTgsNS40Njg3NCAtMjIuMzk3NTMsMCAtMzUuNTk5MiwtMTIuNzQ4ODEgLTM1LjU5OTIsLTM2Ljk5MjQxIFYgNTUuNjYyNzgzIGggLTkuNTA5MzcgViAzNy42MTk0MDIgaCA5LjUwOTM3IFYgMTkuMTU4MDI5IGggNDcuMTk4NTUgdiAxOC40NjEzNzMgaCAxNS41MDA2MyB2IDE4LjA0MzM4MSBoIC0xNS41MDA2MyB2IDgxLjY4Mjg2NyBjIDAsOC44MTI3IDEuNTY3NDgsMTYuNTQ1NTcgOS4xOTU4OCwxNi41NDU1NyAyLjIyOTQxLC0wLjAwNCA0LjQxMzMyLC0wLjYzMTEzIDYuMzA0NzUsLTEuODExMzEgdiAxOC45NDkwNCBNIDYzMC45Mjc4Miw1NS42NjI3ODMgaCA0Ni44NTAyMSBWIDQ4LjM0Nzg5OSBDIDY3Ny43NzgwMywxNC44NzM1OTggNjU1LjQxNTMzLDAgNjIyLjI1NDQ0LDAgYyAtMzEuNjk3OTEsMCAtNTUuNTIzNTksMTcuNzI5ODg3IC01NS41MjM1OSw0OC43NjU4OTMgMCw1OC4xNzA3MzcgNjUuODM0MTIsNDUuMjgyNjEzIDY1LjgzNDEyLDg0Ljc0ODE0NyAwLDEwLjQ0OTg1IC00LjA3NTQ1LDEzLjkzMzEyIC05LjAyMTcyLDEzLjkzMzEyIC00Ljk0NjI1LDAgLTguOTg2ODcsLTMuNDgzMjcgLTguOTg2ODcsLTEzLjkzMzEyIHYgLTE0LjQyMDc2IGggLTQ3LjI2ODIxIHYgNi45NjY1NiBjIDAsMzQuOTM3MjggMjIuNzQ1ODYsNTAuNDAzMDMgNTYuOTUxNzQsNTAuNDAzMDMgMzIuNjczMjQsMCA1Ny4wNTYyNSwtMTguMTgyNzEgNTcuMDU2MjUsLTUwLjcxNjU1IDAsLTY0LjgyMzc4NyAtNjcuNzE1MTEsLTQ2Ljg1MDA3MyAtNjcuNzE1MTEsLTgyLjcyNzgzNyAwLC0xMC40NDk4MzQgNC4yMTQ3OCwtMTMuOTMzMTEyIDguNjczMzksLTEzLjkzMzExMiA0LjQ1ODYxLDAgOC42NzMzOCwzLjQ4MzI3OCA4LjY3MzM4LDEzLjkzMzExMiB6IE0gODI4LjI5MDg4LDgwLjA0NTczIGMgMCwtMTIuMDE3MzExIC0xLjM1ODQ5LC0yMC42OTA2NzEgLTcuODcyMjIsLTIwLjY5MDY3MSAtNi41MTM3NSwwIC03Ljg3MjI0LDguNjczMzYgLTcuODcyMjQsMjAuNjkwNjcxIHYgNTEuNDEzMTggYyAwLDEyLjAxNzMxIDEuMzU4NDksMjAuNjkwNjggNy44NzIyNCwyMC42OTA2OCA2LjUxMzczLDAgNy44NzIyMiwtOC42NzMzNyA3Ljg3MjIyLC0yMC42OTA2OCB6IG0gLTcuODcyMjIsLTQ0Ljg2NDYyMyBjIDMyLjAxMTM5LDAgNTUuMTA1NTgsMTguMDA4NTUxIDU1LjEwNTU4LDU4Ljg2NzM5OSBWIDExNy42MzAzIGMgMCw0MC44NTg4NSAtMjMuMDk0MTksNTguODY3MzkgLTU1LjEwNTU4LDU4Ljg2NzM5IC0zMi4wMTE0MiwwIC01NS4xMDU2MiwtMTguMDA4NTQgLTU1LjEwNTYyLC01OC44NjczOSBWIDkzLjg3NDM0NCBjIDAsLTQwLjg1ODg1MSAyMy4wNTkzNywtNTguODY3NDAyIDU1LjEwNTYyLC01OC44Njc0MDIgbSAxMzIuMzY0OTIsNDkuNjM2NzEzIGMgMCwtMTIuMDUyMTM5IC0xLjM1ODQ5LC0yMC43MjU1MDEgLTcuODcyMjQsLTIwLjcyNTUwMSAtNi41MTM3NSwwIC03Ljg3MjIyLDguNjczMzYyIC03Ljg3MjIyLDIwLjcyNTUwMSB2IDQyLjA3ODAwNSBjIDAsMTIuMDE3MyAxLjM1ODQ3LDIwLjY5MDY2IDcuODcyMjIsMjAuNjkwNjYgNi41MTM3NSwwIDcuODcyMjQsLTguNjczMzYgNy44NzIyNCwtMjAuNjkwNjYgeiBtIDExLjk4MjUsLTQ5LjYzNjcxMyBjIDIyLjMyNzg3LDAgMzUuMjUwODIsMTguMDA4NTUxIDM1LjI1MDgyLDU4Ljg2NzQwMiB2IDIzLjU4MTc5NiBjIDAsNDAuODU4ODQgLTEyLjkyMjk1LDU4Ljg2NzM5IC0zNS4yNTA4Miw1OC44NjczOSAtMTEuMTE4MDUsMC4wNTk0IC0yMS41NDc3MywtNS4zNzcwNiAtMjcuODY2MzEsLTE0LjUyNTI4IHYgNDYuMDE0MTIgSCA4ODkuOTQ1MDYgViAzNy42MTk0MDIgaCA0Ny4yMzMzNyB2IDExLjkxMjgxMSBjIDYuMzE4NTcsLTkuMTQ4MjE2IDE2Ljc0ODI2LC0xNC41ODQ2NjggMjcuODY2MzIsLTE0LjUyNTI3MSIvPgo8L3N2Zz4="};</script>
 <script id="embedded" type="application/json">{
@@ -187,77 +221,102 @@
   "limits": "Synthetic panel; stated intent overstates buying; Hype from Wikipedia and YouTube only."
 }</script>
 <script>
-function ratioText(r) { return r.toFixed(2) + "x last year"; }
+const MINUS = "−";
+function sgn(n, dec) { const s = Math.abs(n).toFixed(dec); return (n < 0 ? MINUS : n > 0 ? "+" : "") + s; }
+function ratioText(r) { return r.toFixed(2) + "×"; }
 
 function render(d) {
   const v = d.verdict, on = d.products.On, nk = d.products.Nike;
   const cfg = {
-    "OVERHYPED":       { cls: "over",   text: "OVERHYPED relative to " + v.control },
-    "UNDER-THE-RADAR": { cls: "under",  text: "UNDER-THE-RADAR relative to " + v.control },
-    "IN LINE":         { cls: "inline", text: "IN LINE with " + v.control }
+    "OVERHYPED":       { text: "OVERHYPED relative to " + v.control },
+    "UNDER-THE-RADAR": { text: "UNDER-THE-RADAR relative to " + v.control },
+    "IN LINE":         { text: "IN LINE with " + v.control }
   }[v.verdict];
-  const sign = v.difference > 0 ? "+" : "";
-  document.getElementById("verdict").innerHTML =
-    '<span class="badge ' + cfg.cls + '">' + v.verdict + '</span>' +
-    '<div class="text"><div class="headline">' + v.product + ': ' + cfg.text + '</div>' +
-    '<div class="detail">Hype minus Wallet gap: ' + v.product + ' ' + v.product_gap + ', ' + v.control + ' ' + v.control_gap +
-    '. Difference ' + sign + v.difference + ' (a verdict needs more than 15 either way).</div></div>';
 
-  const logo = (key, alt) => '<span class="logo"><img src="' + LOGOS[key] + '" alt="' + alt + ' logo"></span>';
+  // coverage header
+  document.getElementById("cover").innerHTML =
+    `<span class="tk">${on.ticker}</span> vs. <span class="tk">${nk.ticker}</span> &middot; <span class="title">Hype vs. Wallet</span>` +
+    ` &middot; Data as of ${d.generated} &middot; n = ${d.sample_size}`;
+
+  // rating block
+  const pos = Math.max(0, Math.min(100, (v.difference + 30) / 60 * 100));
+  const band = { "OVERHYPED": "above +15", "UNDER-THE-RADAR": "below " + MINUS + "15", "IN LINE": "between " + MINUS + "15 and +15" }[v.verdict];
+  const ticks = [[0, MINUS + "30"], [25, MINUS + "15"], [50, "0"], [75, "+15"], [100, "+30"]]
+    .map(t => `<span style="left:${t[0]}%">${t[1]}</span>`).join("");
+  document.getElementById("rating").innerHTML =
+    `<div>
+       <div class="kicker">Rating: ${v.product} vs. ${v.control}</div>
+       <div class="word${v.verdict.length > 9 ? " long" : ""}">${v.verdict}</div>
+       <div class="pts">${sgn(v.difference, 0)} pts vs. ${v.control} &middot; threshold ±15</div>
+       <div class="detail">${v.product} is ${cfg.text}. Hype minus Wallet gap: ${v.product} ${sgn(v.product_gap, 0)}, ${v.control} ${sgn(v.control_gap, 0)}.</div>
+     </div>
+     <div class="gauge" role="img" aria-label="Gauge from ${MINUS}30 to +30 points. Marker at ${sgn(v.difference, 0)}, ${band}, rated ${v.verdict}.">
+       <div class="g-marker" style="left:${pos}%"><span class="g-val">${sgn(v.difference, 0)}</span><i></i></div>
+       <div class="g-track"><span class="under"></span><span class="inline"></span><span class="over"></span></div>
+       <div class="g-ticks">${ticks}</div>
+       <div class="g-names"><span>UNDER-THE-RADAR</span><span>IN LINE</span><span>OVERHYPED</span></div>
+     </div>`;
+
+  // scorecard table
+  const logo = (key, alt) => `<span class="lgbox"><img src="${LOGOS[key]}" alt="${alt} logo"></span>`;
   const head = (cls, name, p) =>
-    '<div class="col-head ' + cls + '">' + logo(cls, name) + '<div><div class="name">' + name + '</div>' +
-    '<div class="meta">' + p.ticker + ' &middot; $' + p.price_usd + ' ' + p.price_label + '</div></div></div>';
+    `<th class="col ${cls}" scope="col"><div class="ch">${logo(cls, name)}<div>` +
+    `<div class="cname"><span class="sw"></span>${name}</div>` +
+    `<div class="cmeta"><span class="tk">${p.ticker}</span> &middot; $${p.price_usd} ${p.price_label}</div></div></div></th>`;
 
-  const rows = [
-    { t: "Hype", s: "0-100", f: p => '<div class="score">' + p.hype + '<span>/ 100</span></div>' +
-        '<div class="sub">Wikipedia <b>' + ratioText(p.attention_ratios.wikipedia) + '</b><br>YouTube <b>' +
-        ratioText(p.attention_ratios.youtube) + '</b></div>' },
-    { t: "Market", s: "0-100", f: p => '<div class="score">' + p.market.score + '<span>/ 100</span></div>' +
-        '<div class="sub">30-day price <b>' + (p.market.price_change * 100).toFixed(1) + '%</b><br>Volume <b>' +
-        p.market.volume_ratio + 'x</b> normal</div>' },
-    { t: "Wallet", s: "0-80", f: p => '<div class="score">' + p.wallet + '<span>/ 80</span></div>' +
-        '<div class="sub">Purchase intent at <b>$' + p.price_usd + '</b><br>Panel of <b>' + d.sample_size + '</b></div>' }
-  ];
+  const survey = p => p.survey_q3 || p.survey_q5;
+  const hypeCell = p =>
+    `<div class="numrow"><span class="num">${p.hype}</span><span class="of">/ 100</span>` +
+    `<span class="side">Wikipedia <b>${ratioText(p.attention_ratios.wikipedia)}</b><br>YouTube <b>${ratioText(p.attention_ratios.youtube)}</b></span></div>` +
+    `<div class="det">Attention vs. last year's level</div>`;
+  const marketCell = p =>
+    `<div class="numrow"><span class="num">${p.market.score}</span><span class="of">/ 100</span></div>` +
+    `<div class="det">30-day price <b>${sgn(p.market.price_change * 100, 1)}%</b><br>Volume <b>${p.market.volume_ratio}×</b> normal</div>`;
+  const walletCell = p => {
+    const s = survey(p);
+    return `<div class="numrow"><span class="num">${p.wallet}</span><span class="of">/ 80</span></div>` +
+      `<div class="det"><b>${s.definitely}</b> definitely / <b>${s.probably}</b> probably of <b>${s.total}</b><br>` +
+      `Purchase intent at $${p.price_usd} (${p.price_label})</div>`;
+  };
 
-  let html = '<div class="spacer"></div>' + head("on", "On", on) + head("nike", "Nike", nk);
-  rows.forEach(r => {
-    html += '<div class="row-label"><div class="t">' + r.t + '</div><div class="s">' + r.s + '</div></div>' +
-      '<div class="card tile on">' + r.f(on) + '</div><div class="card tile nike">' + r.f(nk) + '</div>';
-  });
-  document.getElementById("grid").innerHTML = html;
+  const floored = on.hype === 0 || nk.hype === 0;
+  document.getElementById("score").innerHTML =
+    `<h2>Scorecard</h2>
+     <table>
+       <colgroup><col class="c-label"><col><col></colgroup>
+       <thead><tr><th scope="col"></th>${head("on", "On", on)}${head("nike", "Nike", nk)}</tr></thead>
+       <tbody>
+         <tr${floored ? ' class="has-note"' : ""}><th scope="row">Hype<small>0&ndash;100</small></th><td>${hypeCell(on)}</td><td>${hypeCell(nk)}</td></tr>
+         ${floored ? `<tr class="note"><td></td><td colspan="2">Attention is below last year's level; the score floors at 0.</td></tr>` : ""}
+         <tr><th scope="row">Market<small>0&ndash;100</small></th><td>${marketCell(on)}</td><td>${marketCell(nk)}</td></tr>
+         <tr><th scope="row">Wallet<small>0&ndash;80</small></th><td>${walletCell(on)}</td><td>${walletCell(nk)}</td></tr>
+       </tbody>
+     </table>`;
 
+  // backtest strip
   const g = d.gamestop_backtest;
+  const multiple = (1 + g.market.price_change).toFixed(1) + "×";
+  const pct = "+" + Math.round(g.market.price_change * 100).toLocaleString("en-US") + "%";
+  const hind = g.after_window
+    ? `<p><strong>${g.after_window.hindsight_label} in hindsight.</strong> Three weeks after the window the stock was down ` +
+      `${Math.abs(Math.round(g.after_window.change_to_02_19 * 100))}% ($${g.after_window.close_2021_01_29.toFixed(2)} to ` +
+      `$${g.after_window.close_2021_02_19.toFixed(2)}, 19 Feb 2021, split-adjusted prices). Two months after, it was still ` +
+      `${Math.abs(Math.round(g.after_window.change_to_03_31 * 100))}% below the window-end close. ` +
+      `This label is not from the verdict formula, which needs a Wallet score that cannot be collected for 2021.</p>`
+    : "";
   document.getElementById("gme").innerHTML =
-    '<div class="gme-head">' + logo("gme", "GameStop") + '<h2>What real hype looks like</h2></div>' +
-    '<div class="sub">GameStop, last 30 days up to ' + g.window_end + ' vs. the year before. No Wallet: nobody can survey 2021 buyers today.</div>' +
-    '<div class="stats">' +
-    '<div class="stat"><div class="v">' + Math.round(g.wikipedia_ratio) + 'x</div><div class="l">Wikipedia attention</div></div>' +
-    '<div class="stat"><div class="v">~' + Math.round(g.market.price_change) + 'x</div><div class="l">Stock up</div></div>' +
-    '<div class="stat"><div class="v">' + g.hype + '</div><div class="l">Hype</div></div>' +
-    '<div class="stat"><div class="v">' + g.market.score + '</div><div class="l">Market</div></div></div>' +
-    '<table class="bt"><thead><tr><th>Backtest result</th><th>GameStop (GME)</th><th>On vs. Nike today</th></tr></thead><tbody>' +
-    '<tr><td>Wikipedia attention</td><td>' + g.wikipedia_ratio.toFixed(1) + 'x the prior-year median</td><td>' +
-      on.attention_ratios.wikipedia.toFixed(2) + 'x / ' + nk.attention_ratios.wikipedia.toFixed(2) + 'x</td></tr>' +
-    '<tr><td>Hype score</td><td>' + g.hype + ' / 100</td><td>' + on.hype + ' / ' + nk.hype + '</td></tr>' +
-    '<tr><td>30-day stock move</td><td>+' + Math.round(g.market.price_change * 100).toLocaleString() + '%</td><td>' +
-      (on.market.price_change * 100).toFixed(1) + '% / ' + (nk.market.price_change * 100).toFixed(1) + '%</td></tr>' +
-    '<tr><td>Trading volume</td><td>' + g.market.volume_ratio.toFixed(1) + 'x normal</td><td>' +
-      on.market.volume_ratio + 'x / ' + nk.market.volume_ratio + 'x</td></tr>' +
-    '<tr><td>Market score</td><td>' + g.market.score + ' / 100</td><td>' + on.market.score + ' / ' + nk.market.score + '</td></tr>' +
-    '</tbody></table>' +
-    (g.after_window ?
-      '<div class="hind"><span class="badge over">' + g.after_window.hindsight_label + ' (IN HINDSIGHT)</span>' +
-      '<div class="hind-text">Three weeks after the window the stock was down ' +
-      Math.abs(Math.round(g.after_window.change_to_02_19 * 100)) + '% ($' + g.after_window.close_2021_01_29.toFixed(2) + ' to $' +
-      g.after_window.close_2021_02_19.toFixed(2) + ', 19 Feb 2021, split-adjusted prices). Two months after, it was still ' +
-      Math.abs(Math.round(g.after_window.change_to_03_31 * 100)) + '% below the window-end close. ' +
-      'This label is not from the verdict formula, which needs a Wallet score that cannot be collected for 2021.</div></div>' : '') +
-    '<div class="sub" style="margin-top:.9rem">Reading it: at GameStop both signals hit the ceiling together, attention and investors. ' +
-    'On and Nike sit near the floor on attention and near the middle on the stock, so neither looks like a hype spike.</div>';
+    `<div class="strip-head">${logo("gme", "GameStop")}<h2>What real hype looks like</h2></div>
+     <p class="lede">GameStop, 30 days to ${g.window_end} vs. the year before. No Wallet: nobody can survey 2021 buyers today.</p>
+     <div class="figs">
+       <div class="fig"><div class="big">${g.wikipedia_ratio.toFixed(1)}×</div><div class="cap">Wikipedia attention</div><div class="sub">vs. prior-year median</div></div>
+       <div class="fig"><div class="big">${multiple}</div><div class="cap">Stock price</div><div class="sub">${pct} in 30 days</div></div>
+       <div class="fig"><div class="big">${g.hype}</div><div class="cap">Hype</div><div class="sub">out of 100</div></div>
+       <div class="fig"><div class="big">${g.market.score}</div><div class="cap">Market</div><div class="sub">out of 100</div></div>
+     </div>
+     <div class="reading">${hind}<p>For comparison, today's Hype is On ${on.hype} and Nike ${nk.hype}; Market is On ${on.market.score} and Nike ${nk.market.score}.</p></div>`;
 
   document.getElementById("limits").textContent =
     "Limits: synthetic panel; stated intent overstates buying; Hype from Wikipedia and YouTube only.";
-  document.getElementById("footer").textContent = "Data as of " + d.generated + ".";
 }
 
 // Prefer the live results.json; fall back to the embedded copy when opened from file://
