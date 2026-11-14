@@ -63,7 +63,16 @@
       "price_change": 15.874,
       "volume_ratio": 14.39
     },
-    "wallet": null
+    "wallet": null,
+    "after_window": {
+      "note": "Split-adjusted closes from yfinance. Hindsight label, not produced by verdict() (no Wallet score exists for 2021).",
+      "close_2021_01_29": 81.25,
+      "close_2021_02_19": 10.15,
+      "close_2021_03_31": 47.45,
+      "change_to_02_19": -0.875,
+      "change_to_03_31": -0.416,
+      "hindsight_label": "OVERHYPED"
+    }
   },
   "limits": "Synthetic panel; stated intent overstates buying; Hype from Wikipedia and YouTube only."
 }
